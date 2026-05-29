@@ -1,12 +1,17 @@
 import { useState } from "react";
-
+import { Link } from "react-router-dom";
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // active nav state
   const [activeItem, setActiveItem] = useState("Home");
 
-  const navItems = ["Home", "Features", "Insights", "Pricing"];
+  const navItems = [
+  { name: "Home", path: "/" },
+  { name: "Features", path: "/" },
+  { name: "Insights", path: "/" },
+  { name: "Pricing", path: "/" },
+];
 
   return (
     <nav className="bg-[#0a0f1a] border-b border-white/10 sticky top-0 z-50">
@@ -36,27 +41,29 @@ export default function Navbar() {
 
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
-            <a
-              key={item}
-              href="#"
-              onClick={() => setActiveItem(item)}
-              className={`text-sm font-medium transition-colors ${
-                activeItem === item
-                  ? "text-white border-b-2 border-cyan-400 pb-0.5"
-                  : "text-gray-400 hover:text-white"
-              }`}
-            >
-              {item}
-            </a>
-          ))}
-        </div>
+  {navItems.map((item) => (
+    <Link
+      key={item.name}
+      to={item.path}
+      onClick={() => setActiveItem(item.name)}
+      className={`text-sm font-medium transition-colors ${
+        activeItem === item.name
+          ? "text-white border-b-2 border-cyan-400 pb-0.5"
+          : "text-gray-400 hover:text-white"
+      }`}
+    >
+      {item.name}
+    </Link>
+  ))}
+</div>
 
         {/* CTA */}
         <div className="hidden md:block">
+            <Link to="/login">
           <button className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200 tracking-wide">
             GET STARTED
           </button>
+          </Link>
         </div>
 
         {/* Mobile hamburger */}
