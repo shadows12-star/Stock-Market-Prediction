@@ -1,7 +1,12 @@
 import { useState } from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import { Link } from "react-router-dom";
+import axios from "axios";
+import {Link, ServerRouter} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import {useContext} from "react";
+import {AuthContext} from "./AuthProvider";
+
 
 const autofillStyle = {
   WebkitBoxShadow: "0 0 0px 1000px #111827 inset",
@@ -10,18 +15,50 @@ const autofillStyle = {
 };
 
 export default function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const {setIsAuthenticated} = useContext(AuthContext);
+
   const [username, setUsername] = useState("");
+
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const [error, setError] = useState({});
+  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
-    console.log(username,  password);
-  };
+    
+    console.log("Login with:", { username, password });
+    try{
+          const response = await axios.post("http://127.0.0.1:8000/api/token/", {
+          username,
+     
+          password
+        });
+        localStorage.setItem("access_token", response.data.access);
+        localStorage.setItem("refresh_token", response.data.refresh);
+        console.log("Login successful:", response.data);
+        setError({});
+        setSuccess(true);
+        setIsAuthenticated(true);
+        navigate("/dashboard");
+    }
+    catch(err){
+      console.error("Login error:", err.response.data);
+      setError({ general: err.response.data.detail || "An error occurred during login." });
+    }
+    finally{
+      setLoading(false);
+    }
+
+};
 
   return (
     <>
       <Navbar />
+      
       <div className="min-h-screen relative overflow-hidden bg-[#070d18] flex flex-col items-center justify-between px-6 py-12">
 
         {/* Background Glow Effects */}
@@ -48,22 +85,23 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Login Content */}
+        {/* Register Content */}
         <div className="relative z-10 w-full max-w-md flex flex-col items-center gap-8">
 
           {/* Heading */}
           <div className="text-center">
-            <h1 className="text-white text-5xl font-black tracking-tight mb-3">Welcome Back</h1>
-            <p className="text-gray-400 text-sm">Access your predictive trading insights</p>
+            <h1 className="text-white text-5xl font-black tracking-tight mb-3">Get Started</h1>
+            <p className="text-gray-400 text-sm">Create your account and start trading smarter</p>
           </div>
 
-          {/* Login Card — single <form>, no duplicate wrapper div */}
+          {/* Register Card */}
           <form
             onSubmit={handleSubmit}
             className="w-full bg-white/5 backdrop-blur-xl border border-white/10 rounded-[32px] p-8 shadow-[0_20px_80px_rgba(0,0,0,0.45)]"
           >
             {/* Username */}
             <div className="mb-5">
+              
               <label className="text-gray-400 text-[11px] font-bold tracking-widest uppercase mb-2 block">
                 Username
               </label>
@@ -73,30 +111,32 @@ export default function Login() {
                 </svg>
                 <input
                   type="text"
+                  required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="your_username"
                   style={autofillStyle}
                   className="bg-transparent text-white text-sm placeholder-gray-600 outline-none w-full"
                 />
+           
               </div>
+                 
             </div>
 
+       
+
             {/* Password */}
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-gray-400 text-[11px] font-bold tracking-widest uppercase">
-                  Password
-                </label>
-                <a href="#" className="text-cyan-400 text-xs font-semibold hover:text-cyan-300 transition-colors">
-                  Forgot password?
-                </a>
-              </div>
+            <div className="mb-5">
+       
+              <label className="text-gray-400 text-[11px] font-bold tracking-widest uppercase mb-2 block">
+                Password
+              </label>
               <div className="flex items-center gap-3 bg-[#111827]/80 border border-white/10 hover:border-white/20 focus-within:border-cyan-400/50 rounded-xl px-4 py-3 transition-all duration-300">
                 <svg className="w-4 h-4 text-gray-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 <input
+                required
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -121,15 +161,28 @@ export default function Login() {
                   )}
                 </button>
               </div>
+                    
             </div>
 
-            {/* Login Button */}
-            <button
-              type="submit"
-              className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:scale-[1.01] hover:shadow-cyan-500/30 active:scale-[0.99] text-[#070d18] font-extrabold text-lg py-4 rounded-2xl transition-all duration-300 shadow-xl"
-            >
-              Login
+           
+
+            {/* Register Button */}
+            {loading ? (
+              <button
+                type="button"
+                className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:scale-[1.01] hover:shadow-cyan-500/30 active:scale-[0.99] text-[#070d18] font-extrabold text-lg py-4 rounded-2xl transition-all duration-300 shadow-xl"
+                disabled
+              >
+                Logging in...
+              </button>
+            ) : (
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 hover:scale-[1.01] hover:shadow-cyan-500/30 active:scale-[0.99] text-[#070d18] font-extrabold text-lg py-4 rounded-2xl transition-all duration-300 shadow-xl"
+              >
+                   Login
             </button>
+            )}
 
             {/* Small Security Text */}
             <p className="text-center text-gray-500 text-xs mt-4">
@@ -139,7 +192,7 @@ export default function Login() {
             {/* Divider */}
             <div className="flex items-center gap-3 my-6">
               <div className="flex-1 h-px bg-white/10" />
-              <span className="text-gray-600 text-[11px] tracking-widest uppercase font-medium">Or continue with</span>
+              <span className="text-gray-600 text-[11px] tracking-widest uppercase font-medium">Or sign up with</span>
               <div className="flex-1 h-px bg-white/10" />
             </div>
 
@@ -169,13 +222,14 @@ export default function Login() {
               </button>
             </div>
           </form>
+          {error.general && <p className="text-red-400 text-sm mt-4">{error.general}</p>}
+          {success && <p className="text-green-400 text-sm mt-4">Login successful!</p>}
 
-          {/* Sign Up */}
+          {/* Log In Link */}
           <p className="text-gray-500 text-sm">
-            Don't have an account?{" "}
-       
-            <Link to ="/register" className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors">
-              Sign up for free
+            Dont have an account?{" "}
+            <Link to="/register" className="text-cyan-400 font-semibold hover:text-cyan-300 transition-colors">
+              Sign up
             </Link>
           </p>
         </div>

@@ -7,9 +7,14 @@ import {CTA} from "./components/MainSections";
 import Login from "./components/Login";
 import {Routes, Route} from "react-router-dom";
 import Register from "./components/Register";
+import AuthProvider from "./components/AuthProvider";
+import Dashboard from "./components/Dashboard";
+import PrivateRoute from "./components/PrivateRoute";
+import PublicRoute from "./components/PublicRoute";
 
 export default function App() {
   return (
+    <AuthProvider>
     <div className="min-h-screen bg-[#0a0f1a]">
       <Routes>
         <Route path="/" element={
@@ -22,11 +27,25 @@ export default function App() {
       <Footer /></>
 
         } />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        } />
+        <Route path="/register" element={
+          <PublicRoute>
+            <Register />
+          </PublicRoute>
+        } />
+        <Route path="/dashboard" element={
+          <PrivateRoute>
+            <Dashboard />
+          </PrivateRoute>
+        } />
       </Routes>
       
      
     </div>
+    </AuthProvider>
   );
 }

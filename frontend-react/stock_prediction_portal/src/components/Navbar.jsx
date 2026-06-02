@@ -1,8 +1,14 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import {useContext} from "react";
+import {AuthContext} from "./AuthProvider";
+import { useNavigate } from "react-router-dom";
 export default function Navbar() {
-  const [menuOpen, setMenuOpen] = useState(false);
 
+  const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const {isAuthenticated} = useContext(AuthContext);
+    const {setIsAuthenticated} = useContext(AuthContext);
   // active nav state
   const [activeItem, setActiveItem] = useState("Home");
 
@@ -12,7 +18,13 @@ export default function Navbar() {
   { name: "Insights", path: "/" },
   { name: "Pricing", path: "/" },
 ];
+const handleLogout = () => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("refresh_token");
 
+  setIsAuthenticated(false);
+  navigate("/login");
+}
   return (
     <nav className="bg-[#0a0f1a] border-b border-white/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -59,11 +71,22 @@ export default function Navbar() {
 
         {/* CTA */}
         <div className="hidden md:block">
+          {isAuthenticated ? (
+           <button onClick={handleLogout} className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200 tracking-wide">
+                Logout
+              </button>
+            
+            
+             
+   
+          ) : (
             <Link to="/login">
-          <button className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200 tracking-wide">
-            GET STARTED
-          </button>
-          </Link>
+              <button className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200 tracking-wide">
+                Login
+              </button>
+            </Link>
+          )}  
+        
         </div>
 
         {/* Mobile hamburger */}
