@@ -11,6 +11,7 @@ import AuthProvider from "./components/AuthProvider";
 import Dashboard from "./components/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import PublicRoute from "./components/PublicRoute";
+import About from "./components/About";
 
 export default function App() {
   return (
@@ -41,6 +42,11 @@ export default function App() {
           <PrivateRoute>
             <Dashboard />
           </PrivateRoute>
+        } />
+        <Route path="/about" element={
+       
+            <About />
+          
         } />
       </Routes>
       

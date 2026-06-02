@@ -1,8 +1,8 @@
 export default function Footer() {
   const links = {
-    PLATFORM: ["Features", "Real-time Data", "AI Insights", "Pricing"],
-    COMPANY: ["About Us", "Careers", "Press Kit", "Contact"],
-    LEGAL: ["Privacy Policy", "Terms of Service", "Security"],
+    PLATFORM: ["Dashboard", "Moving Averages", "LSTM Metrics", "Technical Indicators"],
+    COMPANY: ["About Us", "Contact Support"],
+    LEGAL: ["Privacy Policy", "Terms of Service"],
   };
 
   return (
@@ -17,10 +17,10 @@ export default function Footer() {
                   <path d="M3 3l7 7-4 4 7 7 4-4 7-7-7-7-4 4z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round"/>
                 </svg>
               </div>
-              <span className="text-white font-bold text-lg tracking-wide">AETHER AI</span>
+              <span className="text-white font-bold text-lg tracking-wide">AETHENA</span>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
-              The future of algorithmic market prediction, powered by advanced artificial intelligence.
+              Deep learning time-series visualization engine, pairing Django and TensorFlow to deliver backtested stock analysis.
             </p>
           </div>
 
@@ -44,7 +44,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-600 text-xs tracking-wide">
-            © 2024 AETHER AI SYSTEMS. ALL RIGHTS RESERVED.
+            © 2026 AETHENA AI SYSTEMS. ALL RIGHTS RESERVED.
           </p>
           <div className="flex items-center gap-4">
             {/* Globe */}

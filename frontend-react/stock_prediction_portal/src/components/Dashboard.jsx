@@ -1,141 +1,266 @@
-import React from 'react'
-import { useState, useEffect } from 'react';
-import axiosInstance from './axiosinstance';
+import React, { useState, useEffect } from "react";
+import axiosInstance from "./axiosinstance";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+
 const Dashboard = () => {
-  const[ticker, setTicker] = useState("");
+  const [ticker, setTicker] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const [prediction, setPrediction] = useState(null);
   const [days_100_plot, setDays100Plot] = useState(null);
   const [days_200_plot, setDays200Plot] = useState(null);
-  const [plot,setPlot] = useState(null);
+  const [plot, setPlot] = useState(null);
+
   const [mse, setMse] = useState(null);
   const [mae, setMae] = useState(null);
   const [r2Score, setR2Score] = useState(null);
+
   const handlesubmit = async (e) => {
-    setLoading(true);
-    setError(null);
     e.preventDefault();
 
-    try{
-        const response = await axiosInstance.post('/predict/', {ticker});
-        const data = await response.data;
-        console.log("Stock prediction:", data); 
-       const backendRoot = import.meta.env.VITE_BACKEND_ROOT || 'http://127.0.0.1:8000';
-        const imageUrl = backendRoot + data.image_url;
-        const days100PlotUrl = backendRoot + data["100_days_moving_average_image_url"];
-        const days200PlotUrl = backendRoot + data["200_days_moving_average_image_url"];
-        const plotPredictionUrl = backendRoot + data["prediction_image_url"];
-        const r2 = data.r2_score;
-        const mae = data.mae;
-        const mse = data.mse;
-        console.log("Image URL:", imageUrl);
-        console.log("100 Days Moving Average Image URL:", days100PlotUrl);
-        console.log("200 Days Moving Average Image URL:", days200PlotUrl);
-        console.log("Prediction Image URL:", plotPredictionUrl);
-        setPlot(imageUrl);
-        setDays100Plot(days100PlotUrl);
-        setDays200Plot(days200PlotUrl);
-        setPrediction(plotPredictionUrl);
-        setMse(data.mse);
-        setMae(data.mae);
-        setR2Score(data.r2_score);
-        setTicker("");
-        setLoading(false);
+    setLoading(true);
+    setError(null);
 
-    }
-    catch(error){
-        console.error("Error fetching stock prediction:", error);
-        setError("Error fetching stock prediction. Please try again.");
-    
-        setTicker("");
-    }
-    finally{
-        setLoading(false);
-    }
-  }
+    try {
+      const response = await axiosInstance.post("/predict/", {
+        ticker,
+      });
 
- 
- useEffect(() => {
+      const data = response.data;
+
+      const backendRoot =
+        import.meta.env.VITE_BACKEND_ROOT ||
+        "http://127.0.0.1:8000";
+
+      setPlot(backendRoot + data.image_url);
+      setDays100Plot(
+        backendRoot +
+          data["100_days_moving_average_image_url"]
+      );
+      setDays200Plot(
+        backendRoot +
+          data["200_days_moving_average_image_url"]
+      );
+      setPrediction(
+        backendRoot + data["prediction_image_url"]
+      );
+
+      setMse(data.mse);
+      setMae(data.mae);
+      setR2Score(data.r2_score);
+
+      setTicker("");
+    } catch (error) {
+      console.error(error);
+      setError(
+        "Unable to analyze this stock. Please try another ticker."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     const fetchProtectedData = async () => {
-    try{
-        const response = await axiosInstance.get('/protected-view/');
-        const data = await response.data;
-        console.log("Protected data:", data);
-    }
-    catch(error){
-        console.error("Error fetching protected data:", error);
-    }
+      try {
+        await axiosInstance.get("/protected-view/");
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
-}
+    fetchProtectedData();
+  }, []);
 
-fetchProtectedData();
- 
-
-    }, [])
-
-  
   return (
     <>
-    <Navbar />
-     <div className="text-white p-8">
-      <form onSubmit={handlesubmit}>
-        <input
-        required
-        value={ticker}
-        onChange={(e) => setTicker(e.target.value)}
-          type="text"
-          placeholder="Search stocks..."
-          className="w-full p-2 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
-        />
-       
-        <button type="submit" className="mt-4 bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200 tracking-wide">
-         {loading ? "Predicting..." : "Predict Stock"}
-        </button>
-      </form>
-      <div className="mt-8 bg-gray-800 p-4 rounded">
-        {plot && <img src={plot} alt="Stock Plot" className="w-full h-auto rounded" />}
-      </div>
-      <div className="mt-8 bg-gray-800 p-4 rounded">
-        {days_100_plot && <img src={days_100_plot} alt="100-Day Moving Average Plot" className="w-full h-auto rounded" />}
-      </div>
-      <div className="mt-8 bg-gray-800 p-4 rounded">
-        {days_200_plot && <img src={days_200_plot} alt="200-Day Moving Average Plot" className="w-full h-auto rounded" />}
-      </div>
-      <div className="mt-8 bg-gray-800 p-4 rounded">
-        {prediction && <img src={prediction} alt="Stock Price Prediction Plot" className="w-full h-auto rounded" />}
-      </div>
-     {error && <p className="text-red-500">{error}</p>}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-gray-800 p-4 rounded">
-          <h2 className="text-xl font-bold mb-2">Stock Prices</h2>
-          <p>View real-time stock prices and trends.</p>
-        </div>
-      </div>
-    </div>
-    <div className="text-white p-8">
-      <h2 className="text-2xl font-bold mb-4">Model Evaluation Metrics</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-800 p-4 rounded">
-          <h3 className="text-xl font-bold mb-2">Mean Squared Error (MSE)</h3>
-          <p>{mse !== null ? mse.toFixed(4) : "N/A"}</p>
-        </div>  
-        <div className="bg-gray-800 p-4 rounded">
-          <h3 className="text-xl font-bold mb-2">Mean Absolute Error (MAE)</h3>
-          <p>{mae !== null ? mae.toFixed(4) : "N/A"}</p>
-        </div>
-        <div className="bg-gray-800 p-4 rounded">
-          <h3 className="text-xl font-bold mb-2">R² Score</h3>
-          <p>{r2Score !== null ? r2Score.toFixed(4) : "N/A"}</p>
-        </div>
-      </div>
-    </div>
-    <Footer />
-    </>
-   
-  )
-}
+      <Navbar />
 
-export default Dashboard
+      <div className="min-h-screen bg-[#0a0f1a] text-white">
+        <div className="max-w-7xl mx-auto px-6 py-10">
+
+          {/* Hero Section */}
+          <div className="mb-12">
+            <h1 className="text-5xl font-bold mb-4">
+              AI Stock Prediction Dashboard
+            </h1>
+
+            <p className="text-gray-400 max-w-3xl text-lg">
+              Analyze historical stock performance,
+              explore technical indicators, and
+              generate AI-powered forecasts using a
+              Long Short-Term Memory (LSTM) neural
+              network trained on historical market
+              data.
+            </p>
+          </div>
+
+          {/* Search Form */}
+          <form
+            onSubmit={handlesubmit}
+            className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-10"
+          >
+            <label className="block text-lg font-semibold mb-4">
+              Enter Stock Ticker Symbol
+            </label>
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <input
+                required
+                type="text"
+                value={ticker}
+                onChange={(e) =>
+                  setTicker(e.target.value.toUpperCase())
+                }
+                placeholder="GOOG, AAPL, TSLA..."
+                className="flex-1 bg-[#1f2937] border border-gray-700 rounded-xl px-4 py-3 focus:outline-none focus:border-cyan-400"
+              />
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-cyan-400 hover:bg-cyan-300 disabled:opacity-50 text-black font-bold px-8 py-3 rounded-xl transition-all"
+              >
+                {loading
+                  ? "Analyzing..."
+                  : "Predict Stock"}
+              </button>
+            </div>
+          </form>
+
+          {/* Error */}
+          {error && (
+            <div className="bg-red-500/10 border border-red-500 text-red-400 p-4 rounded-xl mb-8">
+              {error}
+            </div>
+          )}
+
+          {/* Loading Spinner */}
+          {loading && (
+            <div className="flex justify-center py-12">
+              <div className="h-12 w-12 animate-spin rounded-full border-b-2 border-cyan-400"></div>
+            </div>
+          )}
+
+          {/* Metrics */}
+          {(mse !== null ||
+            mae !== null ||
+            r2Score !== null) && (
+            <>
+              <h2 className="text-3xl font-bold mb-6">
+                Model Performance
+              </h2>
+
+              <div className="grid md:grid-cols-3 gap-6 mb-10">
+                <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+                  <p className="text-gray-400">
+                    Mean Squared Error
+                  </p>
+
+                  <h3 className="text-3xl font-bold mt-2 text-cyan-400">
+                    {mse?.toFixed(4)}
+                  </h3>
+                </div>
+
+                <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+                  <p className="text-gray-400">
+                    Mean Absolute Error
+                  </p>
+
+                  <h3 className="text-3xl font-bold mt-2 text-cyan-400">
+                    {mae?.toFixed(4)}
+                  </h3>
+                </div>
+
+                <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+                  <p className="text-gray-400">
+                    R² Score
+                  </p>
+
+                  <h3 className="text-3xl font-bold mt-2 text-cyan-400">
+                    {r2Score?.toFixed(4)}
+                  </h3>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Closing Price */}
+          {plot && (
+            <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 mb-8">
+              <h2 className="text-2xl font-bold mb-4">
+                Historical Closing Price
+              </h2>
+
+              <img
+                src={plot}
+                alt="Closing Price"
+                className="w-full rounded-xl"
+              />
+            </div>
+          )}
+
+          {/* Moving Averages */}
+          {(days_100_plot || days_200_plot) && (
+            <div className="grid lg:grid-cols-2 gap-8 mb-8">
+              {days_100_plot && (
+                <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+                  <h2 className="text-xl font-bold mb-4">
+                    100-Day Moving Average
+                  </h2>
+
+                  <img
+                    src={days_100_plot}
+                    alt="100 Day Moving Average"
+                    className="w-full rounded-xl"
+                  />
+                </div>
+              )}
+
+              {days_200_plot && (
+                <div className="bg-[#111827] border border-white/10 rounded-2xl p-6">
+                  <h2 className="text-xl font-bold mb-4">
+                    200-Day Moving Average
+                  </h2>
+
+                  <img
+                    src={days_200_plot}
+                    alt="200 Day Moving Average"
+                    className="w-full rounded-xl"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* AI Prediction */}
+          {prediction && (
+            <div className="bg-[#111827] border border-cyan-400/20 rounded-2xl p-6 mb-12">
+              <h2 className="text-3xl font-bold text-cyan-400 mb-4">
+                AI Prediction vs Actual Price
+              </h2>
+
+              <p className="text-gray-400 mb-6">
+                Compare actual stock prices with
+                predictions generated by the trained
+                LSTM deep learning model.
+              </p>
+
+              <img
+                src={prediction}
+                alt="Stock Prediction"
+                className="w-full rounded-xl"
+              />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <Footer />
+    </>
+  );
+};
+
+export default Dashboard;

@@ -72,7 +72,7 @@ export default function Register() {
 
           {/* Brand Text */}
           <div className="text-center">
-            <p className="text-cyan-400 font-black text-xl tracking-[0.25em] uppercase">AETHER AI</p>
+            <p className="text-cyan-400 font-black text-xl tracking-[0.25em] uppercase">AETHENA</p>
             <p className="text-gray-500 text-xs tracking-[0.35em] uppercase mt-1">Neural Market Analysis</p>
           </div>
         </div>

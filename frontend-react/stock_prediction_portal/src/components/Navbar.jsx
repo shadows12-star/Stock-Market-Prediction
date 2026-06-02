@@ -1,36 +1,35 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import {useContext} from "react";
-import {AuthContext} from "./AuthProvider";
-import { useNavigate } from "react-router-dom";
-export default function Navbar() {
+import { useState, useContext } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { AuthContext } from "./AuthProvider";
 
+export default function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const {isAuthenticated} = useContext(AuthContext);
-    const {setIsAuthenticated} = useContext(AuthContext);
-  // active nav state
-  const [activeItem, setActiveItem] = useState("Home");
+
+  const { isAuthenticated, setIsAuthenticated } =
+    useContext(AuthContext);
 
   const navItems = [
-  { name: "Home", path: "/" },
-  { name: "Features", path: "/" },
-  { name: "Insights", path: "/" },
-  { name: "Pricing", path: "/" },
-];
-const handleLogout = () => {
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("refresh_token");
+    { name: "Home", path: "/" },
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "About", path: "/about" },
+  ];
 
-  setIsAuthenticated(false);
-  navigate("/login");
-}
+  const handleLogout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+
+    setIsAuthenticated(false);
+    navigate("/login");
+  };
+
   return (
     <nav className="bg-[#0a0f1a] border-b border-white/10 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
         {/* Logo */}
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-cyan-400 flex items-center justify-center">
             <svg
               viewBox="0 0 24 24"
@@ -47,49 +46,46 @@ const handleLogout = () => {
           </div>
 
           <span className="text-white font-bold text-lg tracking-wide">
-            AETHER AI
+            AETHENA
           </span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8">
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              to={item.path}
+              className={`text-sm font-medium transition-colors ${
+                location.pathname === item.path
+                  ? "text-white border-b-2 border-cyan-400 pb-1"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              {item.name}
+            </Link>
+          ))}
         </div>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-  {navItems.map((item) => (
-    <Link
-      key={item.name}
-      to={item.path}
-      onClick={() => setActiveItem(item.name)}
-      className={`text-sm font-medium transition-colors ${
-        activeItem === item.name
-          ? "text-white border-b-2 border-cyan-400 pb-0.5"
-          : "text-gray-400 hover:text-white"
-      }`}
-    >
-      {item.name}
-    </Link>
-  ))}
-</div>
-
-        {/* CTA */}
+        {/* Login / Logout */}
         <div className="hidden md:block">
           {isAuthenticated ? (
-           <button onClick={handleLogout} className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200 tracking-wide">
-                Logout
-              </button>
-            
-            
-             
-   
+            <button
+              onClick={handleLogout}
+              className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200"
+            >
+              Logout
+            </button>
           ) : (
             <Link to="/login">
-              <button className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200 tracking-wide">
+              <button className="bg-cyan-400 hover:bg-cyan-300 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full transition-all duration-200">
                 Login
               </button>
             </Link>
-          )}  
-        
+          )}
         </div>
 
-        {/* Mobile hamburger */}
+        {/* Mobile Hamburger */}
         <button
           className="md:hidden text-gray-400 hover:text-white"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -123,23 +119,34 @@ const handleLogout = () => {
       {menuOpen && (
         <div className="md:hidden bg-[#0d1525] px-6 pb-4 flex flex-col gap-4">
           {navItems.map((item) => (
-            <a
-              key={item}
-              href="#"
-              onClick={() => setActiveItem(item)}
+            <Link
+              key={item.name}
+              to={item.path}
+              onClick={() => setMenuOpen(false)}
               className={`text-sm font-medium ${
-                activeItem === item
+                location.pathname === item.path
                   ? "text-cyan-400"
                   : "text-gray-300 hover:text-white"
               }`}
             >
-              {item}
-            </a>
+              {item.name}
+            </Link>
           ))}
 
-          <button className="bg-cyan-400 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full w-fit">
-            GET STARTED
-          </button>
+          {isAuthenticated ? (
+            <button
+              onClick={handleLogout}
+              className="bg-cyan-400 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full w-fit"
+            >
+              Logout
+            </button>
+          ) : (
+            <Link to="/login" onClick={() => setMenuOpen(false)}>
+              <button className="bg-cyan-400 text-[#0a0f1a] font-bold text-sm px-5 py-2.5 rounded-full w-fit">
+                Login
+              </button>
+            </Link>
+          )}
         </div>
       )}
     </nav>
